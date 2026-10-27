@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Data Farm</title>
+<link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+
+<header>
+<nav aria-label="Locations">
+<button data-go="farm" aria-pressed="true">🌱 Farm</button>
+<button data-go="library" aria-pressed="false">📚 Library</button>
+<button data-go="fence" aria-pressed="false">🧑‍🌾 Fence</button>
+
+<h1>Data Farm</h1>
+<div class="stat"><span class="pill" id="day"></span><span class="pill" id="storm"></span><span class="pill" id="score"></span></div>
+</header>
+
+<main>
+
+<!-- FARM -->
+<section id="farm" class="scene on">
+<div class="farm">
+<div class="phoneCol">
+<div class="panel">
+<nav aria-label="Locations">
+
+</nav>
+<div class="note">From the garden book: plant carrot seeds in rock-free soil. Water daily while they sprout.</div>
+<div class="phone"><div class="clock">12:00</div>
+<div id="chats" aria-live="polite"><div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div></div>
+<button class="btn ask" id="ask">Ask Garden Assistant</button></div>
+</div></div>
+<div>
+<div class="field" id="field" role="group" aria-label="Your farm"></div>
+<p class="log" id="log" aria-live="polite">Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.</p>
+<div class="bar"><button class="btn go" id="next">Sleep until tomorrow</button><button class="btn" id="reset">Start over</button></div>
+</div>
+<div class="panel tools" id="tools">
+<h2>Seeds</h2>
+<button class="tool" data-t="carrot" aria-pressed="true">🥕 Carrot</button>
+<button class="tool" data-t="potato" aria-pressed="false">🥔 Potato</button>
+<button class="tool" data-t="soybean" aria-pressed="false">🫘 Soybean</button>
+<h2>Tools</h2>
+<button class="tool" data-t="water" aria-pressed="false">💧 Water</button>
+<button class="tool" data-t="fert" aria-pressed="false">🧪 Fertilizer</button>
+</div>
+</div>
+</section>
+
+<!-- LIBRARY -->
+<section id="library" class="scene"><div class="place-wrap">
+<div class="panel place"><div class="big">📚</div><h2>The Town Library</h2>
+<p id="visits"></p>
+<button class="btn go" id="readLib">Read the agriculture textbook</button>
+<blockquote class="quote" id="libText" hidden></blockquote></div>
+</div></section>
+
+<!-- FENCE -->
+<section id="fence" class="scene"><div class="place-wrap">
+<div class="panel place"><div class="big">🧑‍🌾</div><h2>The Fence</h2>
+<p>Your neighbor is a farmer. Talking takes a whole day.</p>
+<button class="btn go" id="talkFence">Talk to the farmer (will respond in a day)</button>
+<blockquote class="quote" id="fenceText" hidden></blockquote></div>
+
+
+</main>
+
+<dialog id="end"><h2 id="endT"></h2><div id="endB"></div><p><button class="btn go" id="again">Play again</button></p></dialog>
+
+<script src="script.js"></script>
+</body></html>
