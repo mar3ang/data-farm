@@ -52,11 +52,10 @@ header{
 
 h1{
 font-family:"One Two Trees","Gochi Hand",cursive;
-font-size:clamp(40px,7vw,68px);
+font-size:clamp(35px,7vw,68px);
 color:#bb7334;background:var(--yellow);
-padding:100 18px;border-radius:12px; margin:0 auto;
+padding:10px 18px;border-radius:12px; margin:0 auto;
 justify-content:center;
-transform:rotate(-1.5deg);
 box-shadow:4px 4px 0 var(--orange)
 }
 
@@ -131,7 +130,10 @@ main{
     border:5px solid var(--ink);
     border-radius:28px;
     padding:10px;
-    background:var(--card)
+    background:var(--card); 
+    display:flex;
+    flex-direction:column;
+    height:430px
 }
 .clock{
     font-family:"Gochi Hand",cursive;
@@ -139,6 +141,13 @@ main{
     text-align:center;
     line-height:1
 }
+#chats{
+    flex:1;
+    min-height:0;
+    overflow-y:auto
+}
+.clock{flex-shrink:0}
+.ask{flex-shrink:0}
 .chat{
     background:var(--ai);
     border-radius:12px;
@@ -267,6 +276,10 @@ dialog::backdrop{
     background:rgba(0,0,0,.5)
 }
 li{margin:4px 0}.bad{color:#c0392b}.good{color:#2e8b3d}
+
+.clock small{
+    font-size:22px
+}
 
 .quote{
     margin:16px auto 0;

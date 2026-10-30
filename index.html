@@ -11,7 +11,7 @@
 <button data-go="farm" aria-pressed="true">🌱 Farm</button>
 <button data-go="library" aria-pressed="false">📚 Library</button>
 <button data-go="fence" aria-pressed="false">🧑‍🌾 Fence</button>
-
+</nav>
 <h1>Data Farm</h1>
 <div class="stat"><span class="pill" id="day"></span><span class="pill" id="storm"></span><span class="pill" id="score"></span></div>
 </header>
@@ -23,11 +23,9 @@
 <div class="farm">
 <div class="phoneCol">
 <div class="panel">
-<nav aria-label="Locations">
 
-</nav>
-<div class="note">From the garden book: plant carrot seeds in rock-free soil. Water daily while they sprout.</div>
-<div class="phone"><div class="clock">12:00</div>
+<div class="note" id="gardenNote" >From the garden book: plant carrot seeds in rock-free soil. Water daily while they sprout.</div>
+<div class="phone"><div class="clock" id="clock">8:00</div>
 <div id="chats" aria-live="polite"><div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div></div>
 <button class="btn ask" id="ask">Ask Garden Assistant</button></div>
 </div></div>
@@ -61,7 +59,8 @@
 <div class="panel place"><div class="big">🧑‍🌾</div><h2>The Fence</h2>
 <p>Your neighbor is a farmer. Talking takes a whole day.</p>
 <button class="btn go" id="talkFence">Talk to the farmer (will respond in a day)</button>
-<blockquote class="quote" id="fenceText" hidden></blockquote></div>
+<p id="fenceText" hidden></p></div>
+</div></section>
 
 
 </main>
