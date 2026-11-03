@@ -296,6 +296,14 @@ li{margin:4px 0}.bad{color:#c0392b}.good{color:#2e8b3d}
     font-size:18px
 }
 
+.button-container {
+  display: flex;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+}
 .banner{
     flex-shrink:0;
     background:#e11d1d;

@@ -44,7 +44,7 @@ S.plots.forEach((row,r)=>{const d=document.createElement("div");d.className="row
 row.forEach((p,c)=>{const b=document.createElement("button");b.className="plot s-"+SOILS[r][1]+(p.dead?" dead":"");
 let face="";if(p.dead)face="🥀";else if(p.seed){face=p.g>=4?EMO[p.seed]:p.g>=2?"🌿":"🌱"}
 b.textContent=face;b.setAttribute("aria-label",SOILS[r][0]+" soil, "+(p.seed||"empty"));
-b.innerHTML+=(p.wet?'<span class="tag">💧</span>':"")+(p.fert?'<span class="tag" style="left:4px;right:auto">🧪</span>':"");
+b.innerHTML+=(p.wet?`<span class="tag" style="color:cyan">${p.wet}</span>`:"")+(p.fert?`<span class="tag" style="left:4px;right:auto;color:green">${p.fert}</span>`:"");
 b.onclick=()=>act(r,c);d.appendChild(b)});
 const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][0];d.appendChild(l);$("field").appendChild(d)})}
 
@@ -52,9 +52,22 @@ function act(r,c){const p=S.plots[r][c];
 if(p.seed&&p.g>=4&&!p.dead){p.seed=null;p.g=0;S.score++;log("Harvested! Nice work.");return draw()}
 if(EMO[tool]){if(p.seed)return log("Something is already growing there.");Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dry:0,boost:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
 else if(!p.seed||p.dead)return log("Plant a seed first.");
-else if(tool==="water"){p.wet=(SOILS[r][1]==="sandy"||p.seed==="soybean")?1:2;log("Watered.")}
+else if(tool==="water"){waterPlant(p,r);}
 else{p.fert++;log("Fertilized.")}
 draw()}
+
+function waterPlant(p,r){
+    $("waterChoiceT").textContent=`${p.seed} on ${SOILS[r][0]} soil`;
+    $("waterChoiceB").textContent="Choose how much water to give to this plant (0-5)"
+    $("waterChoice").showModal()
+    let wetValue = p.wet
+    function updateWaterValue(){$("waterValue").textContent=` ${wetValue} `}
+    updateWaterValue()
+    $("waterMinus").onclick=()=>{if(wetValue>0)wetValue--;updateWaterValue()}
+    $("waterPlus").onclick=()=>{if(wetValue<5)wetValue++;updateWaterValue()}
+    $("waterConfirm").onclick=()=>{p.wet=wetValue;$("waterChoice").close();log("Watered.");
+        draw()}
+}
 
 $("next").onclick=()=>{dayStart=Date.now();tick();let msgs=[];
 S.plots.forEach((row,r)=>row.forEach(p=>{if(!p.seed||p.dead||p.g>=4)return;const soil=SOILS[r][1];
@@ -64,7 +77,7 @@ if(p.wet>0){p.g+=(p.seed==="soybean"&&soil!=="loamy")?0.5:1;p.dry=0;if(p.fert&&!
 if(p.dry>=({carrot:2,potato:3,soybean:2})[p.seed]){p.dead="dry";msgs.push("A "+p.seed+" wilted from thirst.")}
 p.wet=soil==="sandy"?0:Math.max(0,p.wet-1);if(p.g>4)p.g=4}));
 S.day++;log(msgs.length?msgs.join(" "):"A quiet night. Check your plants.");
-if(S.day>STORM)return finish();draw()};
+if(S.day>STORM)return finish();if(S.fenced)farmerSend();draw()};
 
 $("ask").onclick=()=>{document.querySelectorAll(".chat.hello").forEach(e=>e.remove());
 const i=Math.floor(Math.random()*TIPS.length);S.asked.push(i);
