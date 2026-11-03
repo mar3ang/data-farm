@@ -156,6 +156,10 @@ main{
     font-size:16px
 }
 .chat b{color:var(--blue)}
+
+.chat.farmer{background:#ffe566;color:#2b2118}
+.chat.farmer b{color:#8a5a00}
+
 .field{
     border:5px solid var(--blue);
     border-radius:10px;
@@ -291,3 +295,16 @@ li{margin:4px 0}.bad{color:#c0392b}.good{color:#2e8b3d}
     box-shadow:2px 3px 0 rgba(0,0,0,.2);
     font-size:18px
 }
+
+.banner{
+    flex-shrink:0;
+    background:#e11d1d;
+    color:#fff;
+    border-radius:12px;
+    padding:4px 10px;
+    margin:6px 0;
+    cursor:pointer;
+    font-size:16px;
+    text-align:center
+}
+.banner[hidden]{display:none}
