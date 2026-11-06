@@ -25,9 +25,7 @@
 <div class="panel">
 
 <div class="note" id="gardenNote" >From the garden book: plant carrot seeds in rock-free soil. Water daily while they sprout.</div>
-<!---Phone---->
 <div class="phone"><div class="clock" id="clock">8:00</div>
-<div class="banner" id="banner" hidden>🔔 New message from the neighbor</div>
 <div id="chats" aria-live="polite"><div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div></div>
 <button class="btn ask" id="ask">Ask Garden Assistant</button></div>
 </div></div>
@@ -67,21 +65,21 @@
 
 </main>
 
-<!-- WATERING POPUP -->
-<dialog id="waterChoice">
-    <h2 id="waterChoiceT"></h2>
-    <div id="waterChoiceB"></div>
+<!-- TOOL POPUP -->
+<dialog id="toolChoice">
+    <h2 id="toolChoiceT"></h2>
+    <div id="toolChoiceB"></div>
     <div class="button-container">
         <div class="item">
-            <button class="btn go" id="waterMinus">-</button>
+            <button class="btn go" id="toolMinus">-</button>
         </div>
-        <p id="waterValue"></p>
+        <p id="toolValue"></p>
         <div class="item">
-            <button class="btn go" id="waterPlus">+</button>
+            <button class="btn go" id="toolPlus">+</button>
         </div>
     </div>
     <p>
-        <button class="btn go" id="waterConfirm">Confirm</button>
+        <button class="btn go" id="toolConfirm">Confirm</button>
     </p>
 </dialog>
 
