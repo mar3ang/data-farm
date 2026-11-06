@@ -10,6 +10,8 @@ const NOTE0="From the garden book: plant carrot seeds in rock-free soil. Water d
 const EMO={carrot:"🥕",potato:"🥔",soybean:"🫛"},STORM=8,GOAL=8;
 let S,tool="carrot";
 let dayStart=Date.now();
+const IDEALWET=[["corn",2,2,2,2],["potato",3,3,3,3],["soybean",2,2,3,4]]
+const IDEALFERT=[["corn",3,3,3,3],["potato",1,0,0,0],["soybean",0,0,0,0]]
 const $=id=>document.getElementById(id);
 
 function tick(){const m=(480+Math.floor((Date.now()-dayStart)/10000))%1440,h=Math.floor(m/60),mm=String(m%60).padStart(2,"0");
@@ -68,6 +70,17 @@ if(p.dry>=({carrot:2,potato:3,soybean:2})[p.seed]){p.dead="dry";msgs.push("A "+p
 p.wet=soil==="sandy"?0:Math.max(0,p.wet-1);if(p.g>4)p.g=4}));
 S.day++;log(msgs.length?msgs.join(" "):"A quiet night. Check your plants.");
 if(S.day>STORM)return finish();if(S.fenced)farmerSend();draw()};
+
+function toolCorrectAmount(p,r,t){
+    if(p.seed==="carrot"){return TCAHelper(p,t==="water"?IDEALWET[0][g+1]:IDEALFERT[0][g+1])}
+    if(p.seed==="potato"){return TCAHelper(p,t==="water"?IDEALWET[1][g+1]:IDEALFERT[1][g+1])}
+    if(p.seed==="soybean"){return TCAHelper(p,t==="water"?IDEALWET[2][g+1]:IDEALFERT[2][g+1])}
+}
+
+// returns true if within 1 of correct amount (so there is a range of 3 accepted values)
+function TCAHelper(p,ideal){
+    return t==="water"?Math.abs(p.wet - ideal)<=1:Math.abs(p.fert - ideal)<=1
+}
 
 $("ask").onclick=()=>{const i=Math.floor(Math.random()*TIPS.length);S.asked.push(i);
 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][0];$("chats").prepend(d);
