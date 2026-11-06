@@ -1,15 +1,8 @@
-const SOILS=[
-    ["sandy","sandy"],
-    ["clay-rich","clay"],
-    ["loamy","loamy"],
-    ["fertile","fertile"],
-    ["rocky","rocky"],
-    ["silt-rich","silt"]
-];
+const SOILS=[["sandy","sandy"],["clay-rich","clay"],["loamy","loamy"],["fertile","fertile"],["rocky","rocky"],["silt-rich","silt"]];
 const TIPS=[
-["Soybeans, like other legumes, are nitrogen-fixing, meaning that they interact with Rhizobia bacteria to replenish nitrogen in soil - a key part of crop rotation - which soybeans unfortunately don’t get to benefit from."],
-["The soybean was first domesticated in the sandy soils of China’s Yangtze Valley."],
-["The soybean is a naturally drought-resistant plant. It does need a lot of water at first, but that tapers off as the plant matures."]
+["Soybeans, like other legumes, are nitrogen-fixing, meaning that they interact with Rhizobia bacteria to replenish nitrogen in soil - a key part of crop rotation - which soybeans unfortunately don’t get to benefit from.",0],
+["The soybean was first domesticated in the sandy soils of China’s Yangtze Valley.",0],
+["The soybean is a naturally drought-resistant plant. It does need a lot of water at first, but that tapers off as the plant matures.",0]
 ];
 const LIB="The soybean is one of America’s most widely grown crops, being grown year-round in parts of the Midwest such as Southern Minnesota, Iowa, and Illinois. The industry of growing it for direct use and derivative products like soy wax can use 2,000 gallons of water per soybean farm per day, and sometimes 3,000 gallons of water per day around harvest time when mature soybean plants begin to convert their sugars to starches. Originating from the relatively nutrient-poor valleys of the tributaries of Yellow River in mainland China, the soybean transferred well to the loose and loam-rich soils of the Great Plains and Midwest, where it continues to be a cash crop for common farmers to this day.";
 const FARMER="So you’re having sump’tn of trouble with your crops, huh? Tell me about it … I see you’re having some trouble with your soybeans. You know, I had problems with it too. I was pretty green, just outta technical college. Didn’t know much nothing, except the necessity of a few things, so I pretty much overwatered and overfertilized every crop. The soybeans took it worst. Whole crop ruined. Took me a whole lotta work over the year after that to just break even. I learned pretty soon after that soybeans don’t need fertilizer of any kind. Something about legumes being nitrogen-fixing that I never quite understood. Just something you gotta know…";
@@ -23,15 +16,12 @@ function tick(){const m=(480+Math.floor((Date.now()-dayStart)/10000))%1440,h=Mat
 $("clock").innerHTML=((h%12)||12)+":"+mm+" <small>"+(h<12?"AM":"PM")+"</small>"}
 setInterval(tick,1000);
 
-function fresh(){
-    dayStart=Date.now();
-    tick();
-    $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
-    S={day:1,score:0,asked:[],visits:3,fenced:false,plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dry:0,boost:0,dead:""})))};
-    $("banner").hidden=true;
-    log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
-    $("chats").innerHTML='<div class="chat hello"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
-    $("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
+function fresh(){dayStart=Date.now();tick();
+$("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
+S={day:1,score:0,asked:[],visits:3,fenced:false,plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dry:0,boost:0,dead:""})))};
+log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
+$("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
+$("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
 
 function showVisits(){$("visits").textContent="Visits left this game: "+S.visits}
 
@@ -44,7 +34,7 @@ S.plots.forEach((row,r)=>{const d=document.createElement("div");d.className="row
 row.forEach((p,c)=>{const b=document.createElement("button");b.className="plot s-"+SOILS[r][1]+(p.dead?" dead":"");
 let face="";if(p.dead)face="🥀";else if(p.seed){face=p.g>=4?EMO[p.seed]:p.g>=2?"🌿":"🌱"}
 b.textContent=face;b.setAttribute("aria-label",SOILS[r][0]+" soil, "+(p.seed||"empty"));
-b.innerHTML+=(p.wet?`<span class="tag" style="color:cyan">${p.wet}</span>`:"")+(p.fert?`<span class="tag" style="left:4px;right:auto;color:green">${p.fert}</span>`:"");
+b.innerHTML+=(p.wet?`<span class="tag" style="color:${SOILS[r][1]==="sandy"?"dodgerBlue":"cyan"}">${p.wet}</span>`:"")+(p.fert?`<span class="tag" style="left:4px;right:auto;color:${SOILS[r][1]==="sandy"?"green":"lightGreen"}">${p.fert}</span>`:"");
 b.onclick=()=>act(r,c);d.appendChild(b)});
 const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][0];d.appendChild(l);$("field").appendChild(d)})}
 
@@ -52,20 +42,20 @@ function act(r,c){const p=S.plots[r][c];
 if(p.seed&&p.g>=4&&!p.dead){p.seed=null;p.g=0;S.score++;log("Harvested! Nice work.");return draw()}
 if(EMO[tool]){if(p.seed)return log("Something is already growing there.");Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dry:0,boost:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
 else if(!p.seed||p.dead)return log("Plant a seed first.");
-else if(tool==="water"){waterPlant(p,r);}
-else{p.fert++;log("Fertilized.")}
+else{toolOnPlant(p,r);}
 draw()}
 
-function waterPlant(p,r){
-    $("waterChoiceT").textContent=`${p.seed} on ${SOILS[r][0]} soil`;
-    $("waterChoiceB").textContent="Choose how much water to give to this plant (0-5)"
-    $("waterChoice").showModal()
-    let wetValue = p.wet
-    function updateWaterValue(){$("waterValue").textContent=` ${wetValue} `}
-    updateWaterValue()
-    $("waterMinus").onclick=()=>{if(wetValue>0)wetValue--;updateWaterValue()}
-    $("waterPlus").onclick=()=>{if(wetValue<5)wetValue++;updateWaterValue()}
-    $("waterConfirm").onclick=()=>{p.wet=wetValue;$("waterChoice").close();log("Watered.");
+function toolOnPlant(p,r){
+    $("toolChoiceT").textContent=`${p.seed} on ${SOILS[r][0]} soil`;
+    $("toolChoiceB").textContent=`Choose how much ${tool==="water"?"water":"fertilizer"} to give to this plant (0-5)`
+    $("toolChoice").showModal()
+    let toolValue = tool==="water"?p.wet:p.fert
+    function updateToolValue(){$("toolValue").textContent=` ${toolValue} `}
+    updateToolValue()
+    $("toolMinus").onclick=()=>{if(toolValue>0)toolValue--;updateToolValue()}
+    $("toolPlus").onclick=()=>{if(toolValue<5)toolValue++;updateToolValue()}
+    $("toolConfirm").onclick=()=>{tool==="water"?p.wet=toolValue:p.fert=toolValue;
+        $("toolChoice").close();tool==="water"?log("Watered."):log("Fertilized.");
         draw()}
 }
 
@@ -79,39 +69,31 @@ p.wet=soil==="sandy"?0:Math.max(0,p.wet-1);if(p.g>4)p.g=4}));
 S.day++;log(msgs.length?msgs.join(" "):"A quiet night. Check your plants.");
 if(S.day>STORM)return finish();if(S.fenced)farmerSend();draw()};
 
-$("ask").onclick=()=>{document.querySelectorAll(".chat.hello").forEach(e=>e.remove());
-const i=Math.floor(Math.random()*TIPS.length);S.asked.push(i);
-const d=document.createElement("div");d.className="chat";d.style.cursor="pointer";
-const show=open=>{d.innerHTML="<b>Garden Assistant</b>"+(open?"<br>"+TIPS[i][0]+"<br><small>Tap to hide</small>":"<br><small>View message</small>");d.dataset.open=open};
-show(true);
-d.onclick=()=>show(d.dataset.open!=="true");
-$("chats").prepend(d);
+$("ask").onclick=()=>{const i=Math.floor(Math.random()*TIPS.length);S.asked.push(i);
+const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][0];$("chats").prepend(d);
 while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}};
 
 $("readLib").onclick=()=>{if(S.visits<=0)return;S.visits--;$("libText").textContent=LIB;$("libText").hidden=false;$("gardenNote").textContent="From the garden book: "+LIB;showVisits();if(S.visits<=0)$("readLib").disabled=true};
 
 $("talkFence").onclick=()=>{if(S.fenced)return;S.fenced=true;$("talkFence").disabled=true;
-S.pending=true;$("banner").hidden=false;
-document.querySelectorAll('nav button[data-go="farm"]').forEach(b=>b.classList.add("ping"));
-$("fenceText").textContent="The farmer will message you. Check your phone on the farm screen.";$("fenceText").hidden=false;$("next").onclick()};
+$("fenceText").textContent="The farmer will message you tomorrow. Check your phone on the farm screen when you wake up.";$("fenceText").hidden=false;};
+
+// now when asking farmer for help, will wait to send text until you click "Sleep until tomorrow" instead of automatically progressing a day.
+// also reactivates fence after sending the text
+function farmerSend(){const d=document.createElement("div");d.className="chat farmer";d.innerHTML="<b>Neighbor (farmer)</b><br>"+FARMER;$("chats").prepend(d);
+document.querySelectorAll('nav button[data-go="farm"]').forEach(b=>b.classList.add("ping"));S.fenced=false;$("talkFence").disabled=false;
+$("fenceText").textContent="The farmer sent you a message. Check your phone on the farm screen.";}
 
 function finish(){draw();const win=S.score>=GOAL;$("endT").textContent=win?"The farm survived the storm!":"The storm hit and the farm ran short.";
 const uniq=[...new Set(S.asked)];
 let h="<p>You harvested "+S.score+" of "+GOAL+" crops.</p>";
+h+=uniq.length?"<p>Tips the assistant gave you:</p><ul>"+uniq.map(i=>'<li class="'+(TIPS[i][1]?"good":"bad")+'">'+(TIPS[i][1]?"Correct: ":"Wrong: ")+TIPS[i][0]+"</li>").join("")+"</ul>":"<p>You never asked the assistant. Next time, try it, then check what it says.</p>";
 h+="<p><b>Remember:</b> AI can sound sure and still be wrong. Check it against other sources, like the library or an experienced neighbor, before you decide.</p>";
 $("endB").innerHTML=h;$("end").showModal()}
 
 $("again").onclick=()=>{$("end").close();fresh()};
 
 $("reset").onclick=fresh;
-
-$("banner").onclick=()=>{$("banner").hidden=true;if(!S.pending)return;S.pending=false;
-document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
-const d=document.createElement("div");d.className="chat farmer";d.style.cursor="pointer";
-const show=open=>{d.innerHTML="<b>Neighbor (farmer)</b>"+(open?"<br>"+FARMER+"<br><small>Tap to hide</small>":"<br><small>View message</small>");d.dataset.open=open};
-show(true);
-d.onclick=()=>show(d.dataset.open!=="true");
-$("chats").prepend(d)};
 
 document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>{tool=b.dataset.t;document.querySelectorAll(".tool").forEach(x=>x.setAttribute("aria-pressed",x===b))});
 
