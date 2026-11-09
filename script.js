@@ -10,6 +10,12 @@ const NOTE0="From the garden book: plant carrot seeds in rock-free soil. Water d
 const EMO={carrot:"🥕",potato:"🥔",soybean:"🫛"},STORM=8,GOAL=8;
 let S,tool="carrot";
 let dayStart=Date.now();
+const IDEALSOIL=[["corn","any"],["potato","fertile"],["wheat","loamy"],["tomato","loose"],
+                 ["rice","clay"],["apple","fertile","loamy"]]
+const IDEALWET=[["corn",2,2,2,2],["potato",3,3,3,3],["wheat",0,4,4,4],["tomato",4,4,3,3],
+                ["rice",5,5,5,5],["apple",3,3,3,3]]
+const IDEALFERT=[["corn",3,3,3,3],["potato",1,0,0,0],["wheat",1,0,0,0],["tomato",4,0,3,0],
+                ["rice",1,0,0,0],["apple",1,1,1,1]]
 const $=id=>document.getElementById(id);
 
 function tick(){const m=(480+Math.floor((Date.now()-dayStart)/10000))%1440,h=Math.floor(m/60),mm=String(m%60).padStart(2,"0");
@@ -68,6 +74,39 @@ if(p.dry>=({carrot:2,potato:3,soybean:2})[p.seed]){p.dead="dry";msgs.push("A "+p
 p.wet=soil==="sandy"?0:Math.max(0,p.wet-1);if(p.g>4)p.g=4}));
 S.day++;log(msgs.length?msgs.join(" "):"A quiet night. Check your plants.");
 if(S.day>STORM)return finish();if(S.fenced)farmerSend();draw()};
+
+// returns true if p.wet or p.fert is within 1 of its respective ideal value, 
+//  or if the seed's soil is equal to its ideal value, depending on t
+// checks against IDEALWET or IDEALFERT or IDEALSOIL 
+//  depending on if t is "water" or "fert" or "soil"
+function toolCorrectAmount(p,r,t){
+    if (!(t==="water"||t==="fert"||t==="soil")) {console.log(`Invalid tool sent to toolCorrectAmount(): ${t}`); return false;}
+    for(let i = 0; i < IDEALWET.length; i++) {
+        if(p.seed===IDEALWET[i][0]){
+            return TCAHelper(t, t==="soil"?SOILS[r][1]:p,
+                t==="water"?IDEALWET[i][g+1]:t==="fert"?IDEALFERT[i][g+1]:IDEALSOIL[i])
+        }
+    }
+    console.log(`${p.seed} not found in ${t==="water"?"IDEALWET":"IDEALFERT"}`); return false;
+}
+
+// returns true if within 1 of correct amount (so there is a range of 3 accepted values)
+// t is "water", "fert", or "soil"
+// p is p if t is "water" or "fert", otherwise p is SOILS[r][1]
+// ideal is IDEALWET[i][g+1] if t is "water" or "fert", otherwise ideal is IDEALSOIL[i]
+function TCAHelper(t,p,ideal){
+    return t==="water"?Math.abs(p.wet - ideal)<=1
+        : t==="fert"?Math.abs(p.fert - ideal)<=1
+        : ideal[1]==="any"||correctSoil(p,ideal) // p = SOILS[r][1] if t = "soil"
+}
+
+// returns true if soil s is equal to any value in ideal (the IDEALSOIL[i] for the seed in s)
+function correctSoil(s,ideal){
+    for(let i = 1; i < ideal.length; i++){
+        if (s===ideal[i]) return true; // seed's soil equals an ideal soil
+    }
+    return false; // seed's soil does not equal an ideal soil
+}
 
 $("ask").onclick=()=>{const i=Math.floor(Math.random()*TIPS.length);S.asked.push(i);
 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][0];$("chats").prepend(d);
