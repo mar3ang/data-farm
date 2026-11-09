@@ -18,10 +18,12 @@ const IDEALFERT=[["corn",3,3,3,3],["potato",1,0,0,0],["wheat",1,0,0,0],["tomato"
                 ["rice",1,0,0,0],["apple",1,1,1,1]]
 const $=id=>document.getElementById(id);
 
+// clock function for the phone's clock
 function tick(){const m=(480+Math.floor((Date.now()-dayStart)/10000))%1440,h=Math.floor(m/60),mm=String(m%60).padStart(2,"0");
 $("clock").innerHTML=((h%12)||12)+":"+mm+" <small>"+(h<12?"AM":"PM")+"</small>"}
 setInterval(tick,1000);
 
+// resets game to default state
 function fresh(){dayStart=Date.now();tick();
 $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
 S={day:1,score:0,asked:[],visits:3,fenced:false,plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dry:0,boost:0,dead:""})))};
@@ -33,6 +35,8 @@ function showVisits(){$("visits").textContent="Visits left this game: "+S.visits
 
 function log(t){$("log").textContent=t}
 
+// updates field state along with day/storm/goal text
+// called after taking an action, not just at the end of each day
 function draw(){
 $("day").textContent="Day "+S.day;$("storm").textContent="Storm in "+(STORM-S.day+1)+" days";$("score").textContent="Harvest "+S.score+"/"+GOAL;
 $("field").innerHTML="";
@@ -44,6 +48,11 @@ b.innerHTML+=(p.wet?`<span class="tag" style="color:${SOILS[r][1]==="sandy"?"dod
 b.onclick=()=>act(r,c);d.appendChild(b)});
 const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][0];d.appendChild(l);$("field").appendChild(d)})}
 
+// runs when clicking on a plot
+// if seed can be harvested, harvests it.
+// if trying to plant a seed but a seed is already there, will block you from planting it
+// stops you from trying to water/fertilize a plot with no seed or a dead seed
+// calls toolOnPlant(p,r) if using water or fertilizer on a living seed
 function act(r,c){const p=S.plots[r][c];
 if(p.seed&&p.g>=4&&!p.dead){p.seed=null;p.g=0;S.score++;log("Harvested! Nice work.");return draw()}
 if(EMO[tool]){if(p.seed)return log("Something is already growing there.");Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dry:0,boost:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
@@ -51,6 +60,8 @@ else if(!p.seed||p.dead)return log("Plant a seed first.");
 else{toolOnPlant(p,r);}
 draw()}
 
+// pulls up a popup box when using water or fertilizer on a seed
+// asks how much water/fertilizer from 0-5, using - and + buttons
 function toolOnPlant(p,r){
     $("toolChoiceT").textContent=`${p.seed} on ${SOILS[r][0]} soil`;
     $("toolChoiceB").textContent=`Choose how much ${tool==="water"?"water":"fertilizer"} to give to this plant (0-5)`
@@ -65,6 +76,9 @@ function toolOnPlant(p,r){
         draw()}
 }
 
+// runs when clicking "Sleep until tomorrow"
+// progresses to the next day and updates field accordingly
+/* NOTE: currently uses placeholders to decide if plants should live */
 $("next").onclick=()=>{dayStart=Date.now();tick();let msgs=[];
 S.plots.forEach((row,r)=>row.forEach(p=>{if(!p.seed||p.dead||p.g>=4)return;const soil=SOILS[r][1];
 if(p.seed==="carrot"&&soil==="rocky"){p.dead="rocks";msgs.push("A carrot got stuck between rocks.");return}
@@ -90,7 +104,7 @@ function toolCorrectAmount(p,r,t){
     console.log(`${p.seed} not found in ${t==="water"?"IDEALWET":"IDEALFERT"}`); return false;
 }
 
-// returns true if within 1 of correct amount (so there is a range of 3 accepted values)
+// returns true if within 1 of correct amount (so there is a range of 3 accepted values for p.wet/p.fert)
 // t is "water", "fert", or "soil"
 // p is p if t is "water" or "fert", otherwise p is SOILS[r][1]
 // ideal is IDEALWET[i][g+1] if t is "water" or "fert", otherwise ideal is IDEALSOIL[i]
@@ -108,21 +122,27 @@ function correctSoil(s,ideal){
     return false; // seed's soil does not equal an ideal soil
 }
 
+// ask garden assistant AI
 $("ask").onclick=()=>{const i=Math.floor(Math.random()*TIPS.length);S.asked.push(i);
 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][0];$("chats").prepend(d);
 while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}};
 
+// take note from libary
 $("readLib").onclick=()=>{if(S.visits<=0)return;S.visits--;$("libText").textContent=LIB;$("libText").hidden=false;$("gardenNote").textContent="From the garden book: "+LIB;showVisits();if(S.visits<=0)$("readLib").disabled=true};
 
+// ask for message from farmer, farmer will respond tomorrow
+// cannot ask for two messages on the same day because S.fenced will be set to true
 $("talkFence").onclick=()=>{if(S.fenced)return;S.fenced=true;$("talkFence").disabled=true;
 $("fenceText").textContent="The farmer will message you tomorrow. Check your phone on the farm screen when you wake up.";$("fenceText").hidden=false;};
 
-// now when asking farmer for help, will wait to send text until you click "Sleep until tomorrow" instead of automatically progressing a day.
-// also reactivates fence after sending the text
+// after a day has passed, farmer will send text if S.fenced=true (meaning you asked for a message)
+// also reactivates fence after sending the text by setting S.fenced=false
 function farmerSend(){const d=document.createElement("div");d.className="chat farmer";d.innerHTML="<b>Neighbor (farmer)</b><br>"+FARMER;$("chats").prepend(d);
 document.querySelectorAll('nav button[data-go="farm"]').forEach(b=>b.classList.add("ping"));S.fenced=false;$("talkFence").disabled=false;
 $("fenceText").textContent="The farmer sent you a message. Check your phone on the farm screen.";}
 
+// runs when the game is over, pulls up a popup box telling you your score
+// lists the tips the AI gave you, and gives you a warning that you should fact-check the AI
 function finish(){draw();const win=S.score>=GOAL;$("endT").textContent=win?"The farm survived the storm!":"The storm hit and the farm ran short.";
 const uniq=[...new Set(S.asked)];
 let h="<p>You harvested "+S.score+" of "+GOAL+" crops.</p>";
@@ -130,12 +150,16 @@ h+=uniq.length?"<p>Tips the assistant gave you:</p><ul>"+uniq.map(i=>'<li class=
 h+="<p><b>Remember:</b> AI can sound sure and still be wrong. Check it against other sources, like the library or an experienced neighbor, before you decide.</p>";
 $("endB").innerHTML=h;$("end").showModal()}
 
+// after game ends, click "Play again" to restart game
 $("again").onclick=()=>{$("end").close();fresh()};
 
+// reset button resets game
 $("reset").onclick=fresh;
 
+// highlights the tool that you currently have selected
 document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>{tool=b.dataset.t;document.querySelectorAll(".tool").forEach(x=>x.setAttribute("aria-pressed",x===b))});
 
+// switches between farm/fence/library
 function go(n){if(n==="farm")document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
 if(n!=="library")$("libText").hidden=true;document.querySelectorAll(".scene").forEach(s=>s.classList.toggle("on",s.id===n));document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.go===n))}
 
