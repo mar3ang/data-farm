@@ -1,4 +1,4 @@
-const SOILS=[["sandy","sandy"],["clay-rich","clay"],["loamy","loamy"],["fertile","fertile"],["rocky","rocky"],["silt-rich","silt"]];
+const SOILS=[["sandy","sandy"],["clay-rich","clay"],["loamy","loamy"],["fertile","fertile"],["rocky","rocky"],["loose","loose"]];
 const TIPS=[
 ["Soybeans, like other legumes, are nitrogen-fixing, meaning that they interact with Rhizobia bacteria to replenish nitrogen in soil - a key part of crop rotation - which soybeans unfortunately don’t get to benefit from.",0],
 ["The soybean was first domesticated in the sandy soils of China’s Yangtze Valley.",0],
@@ -26,7 +26,7 @@ setInterval(tick,1000);
 // resets game to default state
 function fresh(){dayStart=Date.now();tick();
 $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
-S={day:1,score:0,asked:[],visits:3,fenced:false,plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dry:0,boost:0,dead:""})))};
+S={day:1,score:0,asked:[],visits:3,fenced:false,plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
 log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
 $("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
 $("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
@@ -55,7 +55,7 @@ const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][
 // calls toolOnPlant(p,r) if using water or fertilizer on a living seed
 function act(r,c){const p=S.plots[r][c];
 if(p.seed&&p.g>=4&&!p.dead){p.seed=null;p.g=0;S.score++;log("Harvested! Nice work.");return draw()}
-if(EMO[tool]){if(p.seed)return log("Something is already growing there.");Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dry:0,boost:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
+if(EMO[tool]){if(p.seed)return log("Something is already growing there.");Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
 else if(!p.seed||p.dead)return log("Plant a seed first.");
 else{toolOnPlant(p,r);}
 draw()}
@@ -81,27 +81,47 @@ function toolOnPlant(p,r){
 /* NOTE: currently uses placeholders to decide if plants should live */
 $("next").onclick=()=>{dayStart=Date.now();tick();let msgs=[];
 S.plots.forEach((row,r)=>row.forEach(p=>{if(!p.seed||p.dead||p.g>=4)return;const soil=SOILS[r][1];
+    waterDiff = toolCorrectAmount(p,soil,"water");
+        if(waterDiff==="too much"){p.dead="drown";msgs.push(`A ${p.seed} drowned from too much water.`)} // too much water
+        else if(waterDiff==="not enough"){p.dead="dry";msgs.push(`A ${p.seed} dried up and died.`)} // not enough water
+        else{} // ideal water
+    fertDiff = toolCorrectAmount(p,soil,"fert");
+        if(fertDiff==="too much"){p.dead="burn";msgs.push(`Too much fertilizer burned a ${p.seed}.`)} // too much fertilizer
+        else if(fertDiff==="not enough"){p.dead="wilt";msgs.push(`A ${p.seed} was malnourished and ran out of nutrients.`)} // not enough fertilizer
+        else{} // ideal fertilizer
+    soilDiff = toolCorrectAmount(p,soil,"soil");
+        if(soilDiff==="too much"){p.dead="soil";msgs.push(`The ${SOILS[r][1]} soil wasn't sufficient for a ${p.seed}.`)} // not ideal soil
+        else{} // ideal soil
+if(waterDiff==="ideal"&&fertDiff==="ideal"&&soilDiff==="ideal"){p.g++;} // all ideal
+/*
 if(p.seed==="carrot"&&soil==="rocky"){p.dead="rocks";msgs.push("A carrot got stuck between rocks.");return}
 if(p.fert>(soil==="fertile"||p.seed==="soybean"?0:1)){p.dead="burn";msgs.push("Too much fertilizer burned a "+p.seed+".");return}
-if(p.wet>0){p.g+=(p.seed==="soybean"&&soil!=="loamy")?0.5:1;p.dry=0;if(p.fert&&!p.boost&&soil!=="fertile"){p.g++;p.boost=1}}else p.dry++;
+if(p.wet>0){p.g+=(p.seed==="soybean"&&soil!=="loamy")?0.5:1;if(p.fert&&soil!=="fertile"){p.g++;}}
 if(p.dry>=({carrot:2,potato:3,soybean:2})[p.seed]){p.dead="dry";msgs.push("A "+p.seed+" wilted from thirst.")}
-p.wet=soil==="sandy"?0:Math.max(0,p.wet-1);if(p.g>4)p.g=4}));
+*/
+p.wet=0;p.fert=0;if(p.g>4)p.g=4}));
 S.day++;log(msgs.length?msgs.join(" "):"A quiet night. Check your plants.");
 if(S.day>STORM)return finish();if(S.fenced)farmerSend();draw()};
 
-// returns true if p.wet or p.fert is within 1 of its respective ideal value, 
+// returns "ideal" if p.wet or p.fert is within 1 of its respective ideal value, 
 //  or if the seed's soil is equal to its ideal value, depending on t
+// if p.wet, p.fert, or soil (depending on what is being checked) are not ideal
 // checks against IDEALWET or IDEALFERT or IDEALSOIL 
 //  depending on if t is "water" or "fert" or "soil"
-function toolCorrectAmount(p,r,t){
+function toolCorrectAmount(p,soil,t){
     if (!(t==="water"||t==="fert"||t==="soil")) {console.log(`Invalid tool sent to toolCorrectAmount(): ${t}`); return false;}
     for(let i = 0; i < IDEALWET.length; i++) {
         if(p.seed===IDEALWET[i][0]){
-            return TCAHelper(t, t==="soil"?SOILS[r][1]:p,
-                t==="water"?IDEALWET[i][g+1]:t==="fert"?IDEALFERT[i][g+1]:IDEALSOIL[i])
+            
+            diffFromIdeal = TCAHelper(t, t==="soil"?soil:p,
+                t==="water"?IDEALWET[i][p.g+1]:t==="fert"?IDEALFERT[i][p.g+1]:IDEALSOIL[i])
+
+            if (Math.abs(diffFromIdeal) <= 1) {return "ideal"} // ideal
+            else if(diffFromIdeal > 1) {return "too much"} // too much water/fert (or wrong soil)
+            else {return "not enough"} // not enough water/fert
         }
     }
-    console.log(`${p.seed} not found in ${t==="water"?"IDEALWET":"IDEALFERT"}`); return false;
+    console.log(`${p.seed} not found in ${t==="water"?"IDEALWET":t==="fert"?"IDEALFERT":"IDEALSOIL"}`); return false;
 }
 
 // returns true if within 1 of correct amount (so there is a range of 3 accepted values for p.wet/p.fert)
@@ -109,17 +129,18 @@ function toolCorrectAmount(p,r,t){
 // p is p if t is "water" or "fert", otherwise p is SOILS[r][1]
 // ideal is IDEALWET[i][g+1] if t is "water" or "fert", otherwise ideal is IDEALSOIL[i]
 function TCAHelper(t,p,ideal){
-    return t==="water"?Math.abs(p.wet - ideal)<=1
-        : t==="fert"?Math.abs(p.fert - ideal)<=1
-        : ideal[1]==="any"||correctSoil(p,ideal) // p = SOILS[r][1] if t = "soil"
+    return t==="water" ? p.wet - ideal
+        : t==="fert" ? p.fert - ideal
+        : correctSoil(p,ideal) // p = SOILS[r][1] if t = "soil"
 }
 
 // returns true if soil s is equal to any value in ideal (the IDEALSOIL[i] for the seed in s)
 function correctSoil(s,ideal){
+    if(ideal[1]==="any"){return 0;} // true, any soil is allowed
     for(let i = 1; i < ideal.length; i++){
-        if (s===ideal[i]) return true; // seed's soil equals an ideal soil
+        if (s===ideal[i]) return 0; // true, seed's soil equals an ideal soil
     }
-    return false; // seed's soil does not equal an ideal soil
+    return 5; // false, seed's soil does not equal an ideal soil
 }
 
 // ask garden assistant AI
@@ -127,7 +148,7 @@ $("ask").onclick=()=>{const i=Math.floor(Math.random()*TIPS.length);S.asked.push
 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][0];$("chats").prepend(d);
 while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}};
 
-// take note from libary
+// take note from library
 $("readLib").onclick=()=>{if(S.visits<=0)return;S.visits--;$("libText").textContent=LIB;$("libText").hidden=false;$("gardenNote").textContent="From the garden book: "+LIB;showVisits();if(S.visits<=0)$("readLib").disabled=true};
 
 // ask for message from farmer, farmer will respond tomorrow
