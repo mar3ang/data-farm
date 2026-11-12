@@ -35,13 +35,16 @@
 <div class="bar"><button class="btn go" id="next">Sleep until tomorrow</button><button class="btn" id="reset">Start over</button></div>
 </div>
 <div class="panel tools" id="tools">
-<h2>Seeds</h2>
-<button class="tool" data-t="carrot" aria-pressed="true">🥕 Carrot</button>
-<button class="tool" data-t="potato" aria-pressed="false">🥔 Potato</button>
-<button class="tool" data-t="soybean" aria-pressed="false">🫘 Soybean</button>
 <h2>Tools</h2>
 <button class="tool" data-t="water" aria-pressed="false">💧 Water</button>
 <button class="tool" data-t="fert" aria-pressed="false">🧪 Fertilizer</button>
+<h2>Seeds</h2>
+<button class="tool" data-t="corn" aria-pressed="true">🌽 Corn</button>
+<button class="tool" data-t="potato" aria-pressed="false">🥔 Potato</button>
+<button class="tool" data-t="wheat" aria-pressed="false">🌾 Wheat</button>
+<button class="tool" data-t="tomato" aria-pressed="false">🍅 Tomato</button>
+<button class="tool" data-t="rice" aria-pressed="false">🍚 Rice</button>
+<button class="tool" data-t="apple" aria-pressed="false">🍎 Apple</button>
 </div>
 </div>
 </section>
@@ -81,6 +84,35 @@
     <p>
         <button class="btn go" id="toolConfirm">Confirm</button>
     </p>
+</dialog>
+
+<!-- DIALOGUE SELECTION POPUP -->
+<dialog id="dialogueChoice">
+    <header><span class="close-button topright" id="dialogueClose">&times;</span></header>
+    <h2 id="dialogueChoiceT"></h2>
+    <div id="dialogueChoiceB"></div>
+    <div class="button-container">
+        <div class="item">
+            <button class="btn go" id="askCorn">🌽 Corn</button>
+        </div>
+        <div class="item">
+            <button class="btn go" id="askPotato">🥔 Potato</button>
+        </div>
+        <div class="item">
+            <button class="btn go" id="askWheat">🌾 Wheat</button>
+        </div>
+    </div>
+    <div class="button-container">
+        <div class="item">
+            <button class="btn go" id="askTomato">🍅 Tomato</button>
+        </div>
+        <div class="item">
+            <button class="btn go" id="askRice">🍚 Rice</button>
+        </div>
+        <div class="item">
+            <button class="btn go" id="askApple">🍎 Apple</button>
+        </div>
+    </div>
 </dialog>
 
 <dialog id="end"><h2 id="endT"></h2><div id="endB"></div><p><button class="btn go" id="again">Play again</button></p></dialog>
