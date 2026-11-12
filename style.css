@@ -19,6 +19,16 @@ padding-top:env(safe-area-inset-top,0px);
 padding-bottom:env(safe-area-inset-bottom,0px)
 }
 
+#rules{
+    max-width:600px;
+     background:var(--note);
+}
+#rules ul{
+    padding-left:22px;
+    text-align:left;
+    
+}
+
 @media (prefers-color-scheme:dark)
         {:root:not([data-theme="light"])
             {--bg:#10263a;

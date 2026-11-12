@@ -187,3 +187,6 @@ if(n!=="library")$("libText").hidden=true;document.querySelectorAll(".scene").fo
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 
 fresh();
+
+$("rules").showModal();
+$("startGame").onclick=()=>{$("rules").close();dayStart=Date.now();tick()};
