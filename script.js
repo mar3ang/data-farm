@@ -1,27 +1,27 @@
 const SOILS=[["sandy","sandy"],["clay-rich","clay"],["loamy","loamy"],["fertile","fertile"],["rocky","rocky"],["loose","loose"]];
 const TIPS=[
 [["corn",0],
-["Corn’s ability to cross-pollinate via sharing its genetic information on the wind freely and additionally share crucial minerals via the same process means that it thrives in many different soil types, and that it needs 1 - 5 fertilizer a day to thrive.",0],
-["Mature corn cobs naturally dehydrate, indicating the corn plant’s resistance to dry conditions. The traits of the plant make it such that you should be careful to not overwater the plant, and to keep either fertilizing over days of the growing period or soil type across growing periods the same.",1],
+["Corn thrives in many different soil types: it needs 1 - 5 fertilizer a day to thrive.",0],
+["Mature corn is naturally drought-resistant. Be careful not to overwater it, and to keep either fertilizing over days of the growing period or soil type across growing periods the same.",1],
 ["Corn does well in many climes, as long as it gets a moderate amount of fertilizer each day.",1]
 ],[["potato",0],
-["It’s important to note that along with plant domestication comes plant diseases. It’s for fear of plant diseases like potato blight that you should never water potatoes too heavily, nor ever fertilize them beyond a moderate-light degree for fear of mold infecting the crops.",1],
-["Potatoes were first domesticated in nutrient-poor soils, with variable amounts of fertilizer as help. If your degree of fertilization should exceed an established threshold or routine with the plant over the growing period, water at a moderate intensity that day to counteract the impact.",0]
+["To prevent plant diseases like potato blight, never water potatoes too heavily. Furthrmore, be sure to never fertilize them beyond a moderate-light degree.",1],
+["Potatoes were first domesticated in nutrient-poor soils. If your degree of fertilization should exceed an established threshold or routine with the plant over the growing period, water at a moderate intensity that day to counteract the impact.",0]
 ],[["wheat",0],
-["Wheat does best in sandy or loose soils, in which its roots can spread out and absorb more water over a larger land area. If not planted in sandy or loose soils, wheat requires just a small amount of fertilizer during the first day of the growing period for stability and health.",0],
-["The watering level of your wheat should be above an established level from the second day on, if you ever didn’t water your plants for a day, in order to compensate for the lack of water.",1],
-["Watering should be moderate-to-heavy during your second and third day of the growing period if the conditions of your soil are such that you don’t need to fertilize it a majority of days.",1]
+["Wheat does best in sandy or loose soils. If not planted in sandy or loose soils, wheat requires just a small amount of fertilizer during the first day.",0],
+["The watering level should be above an established level from the second day on, if you ever didn’t water your plants for a day.",1],
+["Watering should be moderate-to-heavy during the second/third day of the growing period if soil conditions are such that you don’t need to fertilize it most days.",1]
 ],[["tomato",0],
-["Studies of optimal conditions for growing tomatoes show that you should change your degrees of watering between the first and third days, and that watering should always be below a heavy-moderate intensity.",1],
-["Depending on weather conditions and soil moisture absorption, you should either water your tomatoes moderately for the last half of the growing period or water them heavily in the third quarter of the growing period as a prelude to not watering them at all in the fourth quarter of the growing period.",0],
-["Should fertilizing ever need to reach a heavy-moderate intensity, watering must be equal for the last two days of the growing period in order to compensate for nitrogen in most fertilizers drying out some soils.",1]
+["Studies regarding growing tomatoes show that watering should change in intensity between the first and third days, and that watering should always be below a heavy-moderate intensity.",1],
+["Depending on weather, you should either water your tomatoes moderately for the last two days or water them heavily on the third day before not watering them on the fourth day.",0],
+["Should fertilizing ever reach a heavy-moderate intensity, watering must be equal for the last two days of the growing period.",1]
 ],[["rice",0],
-["If the soil in which you grow rice is sandy, you should make sure to apply fertilizer after the first day in order to ensure a proper soil composition for the growth of the semi-aquatic grass.",0],
-["When growing rice, you should make sure that either your soil is pristine - meaning that it has very low concentrations of pesticides - or that watering is of heavy intensity the second day of the growing period.",1]
+["If the soil in which you grow rice is sandy, you should make sure to apply fertilizer after the first day.",0],
+["When growing rice, make sure that either your soil is pristine or that watering is of heavy intensity the second day of the growing period.",1]
 ],[["apple",0],
-["When growing apples in soils that are not clayrich, you should make sure to not overload your apple rootstocks with watering or fertilizing beyond a moderate intensity.",1],
-["Apple trees are best suited to routine, highly rigidized watering and fertilizing schedules, and the slow absorption of key nutrients and minerals. You should thus be sure to either fertilize or water your apple tree at a light intensity over the first two days.",1],
-["With moderate watering across the growing period, apple trees will absorb the necessary amount of minerals to grow through absorbed water in their roots, and thus will require only light fertilizing over the growing period.",1]
+["When growing apples in non-clayrich soils, make sure to not overload apple rootstocks with watering or fertilizing beyond moderate intensity.",1],
+["Apple trees are best suited to routine, highly rigidized watering and fertilizing schedules. Be sure to either fertilize or water your apple tree at a light intensity over the first two days.",1],
+["With moderate watering across the growing period, apple trees will require only light fertilizing over the growing period.",1]
 ]
 ];
 const LIB=[
