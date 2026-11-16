@@ -21,7 +21,7 @@ const TIPS=[
 ],[["apple",0],
 ["When growing apples in non-clayrich soils, make sure to not overload apple rootstocks with watering or fertilizing beyond moderate intensity.",1],
 ["Apple trees are best suited to routine, highly rigidized watering and fertilizing schedules. Be sure to either fertilize or water your apple tree at a light intensity over the first two days.",1],
-["With moderate watering across the growing period, apple trees will require only light fertilizing over the growing period.",1]
+["With moderate watering every day, apple trees will require only light fertilizing over the growing period.",1]
 ]
 ];
 const LIB=[
@@ -60,7 +60,7 @@ setInterval(tick,1000);
 // resets game to default state
 function fresh(){dayStart=Date.now();tick();
 $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
-S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
+S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",seedsPlantable:[5,5,5,5,5,5],plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
 log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
 $("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
 $("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
@@ -74,6 +74,10 @@ function log(t){$("log").textContent=t}
 function draw(){
 $("day").textContent="Day "+S.day;$("storm").textContent="Storm in "+(STORM-S.day+1)+" days";$("score").textContent="Harvest "+S.score+"/"+GOAL;
 $("field").innerHTML="";
+for (let buttonId = 0; buttonId < TIPS.length; buttonId++) {
+    buttonText = $(TIPS[buttonId][0][0]).textContent
+    $(TIPS[buttonId][0][0]).textContent = buttonText.substring(0, buttonText.length-1) + S.seedsPlantable[buttonId]
+}
 S.plots.forEach((row,r)=>{const d=document.createElement("div");d.className="row";
 row.forEach((p,c)=>{const b=document.createElement("button");b.className="plot s-"+SOILS[r][1]+(p.dead?" dead":"");
 let face="";if(p.dead)face="🥀";else if(p.seed){face=p.g>=4?EMO[p.seed]:p.g>=2?"🌿":"🌱"}
@@ -89,7 +93,15 @@ const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][
 // calls toolOnPlant(p,r) if using water or fertilizer on a living seed
 function act(r,c){const p=S.plots[r][c];
 if(p.seed&&p.g>=4&&!p.dead){p.seed=null;p.g=0;S.score++;log("Harvested! Nice work.");return draw()}
-if(EMO[tool]){if(p.seed)return log("Something is already growing there.");Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
+if(EMO[tool]){if(p.seed)return log("Something is already growing there.");
+for (let i = 0; i < TIPS.length; i++) {
+    if (tool === TIPS[i][0][0]) {
+        if (S.seedsPlantable[i] === 0) {return log("You have no seeds of that type left to plant.");}
+        S.seedsPlantable[i] -= 1;
+        break;
+    }
+}
+    Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
 else if(!p.seed||p.dead)return log("Plant a seed first.");
 else{toolOnPlant(p,r);}
 draw()}
