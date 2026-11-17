@@ -72,16 +72,20 @@ box-shadow:4px 4px 0 var(--orange)
 nav{display:flex;
     gap:8px}
 nav button,.btn
-{font:inherit;
+{
+    font:inherit;
     border:3px solid var(--ink);
     background:var(--card);
     color:var(--ink);
     padding:16px 16px;
     border-radius:14px;
-    cursor:pointer}
+    cursor:pointer
+}
+
 nav button[aria-pressed="true"]
 {background:var(--orange);
     color:#fff}
+
 button:focus-visible{
     outline:4px solid var(--blue);outline-offset:2px
 }
@@ -102,7 +106,7 @@ main{
 
 .farm{
     display:grid;
-    grid-template-columns:260px 1fr 190px;
+    grid-template-columns:260px 1fr 230px;
     gap:16px;
     align-items:start}
 @media(max-width:860px){
@@ -233,7 +237,7 @@ main{
 }
 .tool{
     display:block;
-    width:100%;
+    width: 100%;
     margin:6px 0;
     font:inherit;
     border:3px solid var(--ink);
@@ -345,4 +349,11 @@ li{margin:4px 0}.bad{color:#c0392b}.good{color:#2e8b3d}
   position: absolute;
   right: 0;
   top: 0
+}
+
+.seed-count {
+    color: #7a7a7a; 
+}
+.tool[aria-pressed="true"] .seed-count {
+    color: #5c4d3c; 
 }
