@@ -72,19 +72,34 @@ function log(t){$("log").textContent=t}
 // updates field state along with day/storm/goal text
 // called after taking an action on the field and at the end of each day
 function draw(){
-$("day").textContent="Day "+S.day;$("storm").textContent="Storm in "+(STORM-S.day+1)+" days";$("score").textContent="Harvest "+S.score+"/"+GOAL;
-$("field").innerHTML="";
-for (let buttonId = 0; buttonId < TIPS.length; buttonId++) {
-    buttonText = $(TIPS[buttonId][0][0]).textContent
-    $(TIPS[buttonId][0][0]).textContent = buttonText.substring(0, buttonText.length-12) + S.seedsPlantable[buttonId] + " seeds left"
+    $("day").textContent="Day "+S.day;
+    $("storm").textContent="Storm in "+(STORM-S.day+1)+" days";
+    $("score").textContent="Harvest "+S.score+"/"+GOAL;
+    $("field").innerHTML="";
+
+    const seedKeys = ["corn", "potato", "wheat", "tomato", "rice", "apple"];
+    seedKeys.forEach((seedName, idx) => {
+        const button = $(seedName);
+        if (button) {
+            const span = button.querySelector('.seed-count');
+            if (span) {
+                span.textContent = `  ${S.seedsPlantable[idx]} seeds left`;
+            }
+        }
+    });
+
+    S.plots.forEach((row,r)=>{
+        const d=document.createElement("div");d.className="row";
+        row.forEach((p,c)=>{
+            const b=document.createElement("button");b.className="plot s-"+SOILS[r][1]+(p.dead?" dead":"");
+            let face="";if(p.dead)face="🥀";else if(p.seed){face=p.g>=4?EMO[p.seed]:p.g>=2?"🌿":"🌱"}
+            b.textContent=face;b.setAttribute("aria-label",SOILS[r][0]+" soil, "+(p.seed||"empty"));
+            b.innerHTML+=(p.wet?`<span class="tag" style="color:${SOILS[r][1]==="sandy"?"dodgerBlue":"cyan"}">${p.wet}</span>`:"")+(p.fert?`<span class="tag" style="left:4px;right:auto;color:${SOILS[r][1]==="sandy"?"green":"lightGreen"}">${p.fert}</span>`:"");
+            b.onclick=()=>act(r,c);d.appendChild(b)
+        });
+        const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][0];d.appendChild(l);$("field").appendChild(d)
+    });
 }
-S.plots.forEach((row,r)=>{const d=document.createElement("div");d.className="row";
-row.forEach((p,c)=>{const b=document.createElement("button");b.className="plot s-"+SOILS[r][1]+(p.dead?" dead":"");
-let face="";if(p.dead)face="🥀";else if(p.seed){face=p.g>=4?EMO[p.seed]:p.g>=2?"🌿":"🌱"}
-b.textContent=face;b.setAttribute("aria-label",SOILS[r][0]+" soil, "+(p.seed||"empty"));
-b.innerHTML+=(p.wet?`<span class="tag" style="color:${SOILS[r][1]==="sandy"?"dodgerBlue":"cyan"}">${p.wet}</span>`:"")+(p.fert?`<span class="tag" style="left:4px;right:auto;color:${SOILS[r][1]==="sandy"?"green":"lightGreen"}">${p.fert}</span>`:"");
-b.onclick=()=>act(r,c);d.appendChild(b)});
-const l=document.createElement("div");l.className="soil";l.textContent=SOILS[r][0];d.appendChild(l);$("field").appendChild(d)})}
 
 // runs when clicking on a plot
 // if seed can be harvested, harvests it.
