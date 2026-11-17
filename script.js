@@ -53,7 +53,7 @@ const IDEALFERT=[["corn",3,3,3,3],["potato",1,0,0,0],["wheat",1,0,0,0],["tomato"
 const $=id=>document.getElementById(id);
 
 // clock function for the phone's clock
-function tick(){const m=(480+Math.floor((Date.now()-dayStart)/2000))%1440,h=Math.floor(m/60),mm=String(m%60).padStart(2,"0");
+function tick(){const m=(480+Math.floor((Date.now()-dayStart)/10000))%1440,h=Math.floor(m/60),mm=String(m%60).padStart(2,"0");
 $("clock").innerHTML=((h%12)||12)+":"+mm+" <small>"+(h<12?"AM":"PM")+"</small>"}
 setInterval(tick,1000);
 
@@ -76,7 +76,7 @@ $("day").textContent="Day "+S.day;$("storm").textContent="Storm in "+(STORM-S.da
 $("field").innerHTML="";
 for (let buttonId = 0; buttonId < TIPS.length; buttonId++) {
     buttonText = $(TIPS[buttonId][0][0]).textContent
-    $(TIPS[buttonId][0][0]).textContent = buttonText.substring(0, buttonText.length-1) + S.seedsPlantable[buttonId]
+    $(TIPS[buttonId][0][0]).textContent = buttonText.substring(0, buttonText.length-12) + S.seedsPlantable[buttonId] + " seeds left"
 }
 S.plots.forEach((row,r)=>{const d=document.createElement("div");d.className="row";
 row.forEach((p,c)=>{const b=document.createElement("button");b.className="plot s-"+SOILS[r][1]+(p.dead?" dead":"");
