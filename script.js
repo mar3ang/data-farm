@@ -223,13 +223,19 @@ function farmerSend(){
     console.log(`${S.fenced} not found in FARMER`);
 }
 
+function librarySend(seedIndex){
+    S.visits--;$("libText").textContent=LIB[seedIndex][1];$("libText").hidden=false;
+    $("gardenNote").textContent="From the garden book: "+LIB[seedIndex][1];showVisits();
+    if(S.visits<=0)$("readLib").disabled=true;
+    $("dialogueChoice").close();return;
+}
 
 // popup box for selecting which seed you want to receive advice about from AI/farmer/library
 function dialogueSelection(source){
     $("dialogueChoiceT").textContent=`Receive advice from the ${source}`;
     $("dialogueChoiceB").textContent=`Choose which crop you would like advice about:`
     $("dialogueChoice").showModal()
-    $("dialogueClose").onclick=()=>{$("dialogueChoice").close()}
+    $("dialogueClose").onclick=()=>{$("dialogueChoice").close();return;}
     $("askCorn").onclick=()=>{sendDialogue(source,"corn")}
     $("askPotato").onclick=()=>{sendDialogue(source,"potato")}
     $("askWheat").onclick=()=>{sendDialogue(source,"wheat")}
@@ -251,14 +257,36 @@ function sendDialogue(source, seed){
                 $("dialogueChoice").close();return;
             }
         }
+        console.log(`${seed} not found in TIPS`);
     }
     else if (source==="library"){
-        for(let i = 0; i < LIB.length; i++){
-            if (LIB[i][0]===seed){
-                S.visits--;$("libText").textContent=LIB[i][1];$("libText").hidden=false;
-                $("gardenNote").textContent="From the garden book: "+LIB[i][1];showVisits();
-                if(S.visits<=0)$("readLib").disabled=true;
-                $("dialogueChoice").close();return;
+        libPassword = ""
+        characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+        for(let i = 0; i < 20; i++){
+            (libPassword += characters.charAt(Math.floor(Math.random()*characters.length)));
+        }
+        $("libChallengeT").textContent=`Enter password to receive ${seed} advice`
+        $("libChallengeB").textContent=`Enter this password below: ${libPassword}`
+        $("libChallengeWrong").textContent=""
+        $("libInput").value="";
+        $("libChallenge").showModal();
+        $("libChallengeClose").onclick=()=>{$("libChallenge").close();return;}
+        $("libChallengeConfirm").onclick=()=>{
+            userInput = $("libInput").value;
+            console.log(`User Input: ${userInput}`);
+            console.log(`Password:   ${libPassword}`);
+            $("libInput").value="";
+            if(userInput===libPassword){
+                for(let i = 0; i < LIB.length; i++){
+                    if (LIB[i][0]===seed){librarySend(i);$("libChallenge").close();return;}
+                }
+                console.log(`${seed} not found in LIB`)
+            }
+            else if (userInput===""){
+                $("libChallengeWrong").textContent="Please enter the password."
+            }
+            else{
+                $("libChallengeWrong").textContent="Incorrect password. Please try again."
             }
         }
     }
@@ -268,8 +296,6 @@ function sendDialogue(source, seed){
         $("fenceText").hidden=false;
         $("dialogueChoice").close();return;
     }
-    console.log(`${seed} not found in ${source==="assistant"?"TIPS":"LIB"}`); 
-    // farmer will always successfully return since it is evaluated in farmerSend() instead
 }
 
 // runs when the game is over, pulls up a popup box telling you your score
