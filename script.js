@@ -60,7 +60,7 @@ setInterval(tick,1000);
 // resets game to default state
 function fresh(){dayStart=Date.now();tick();
 $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
-S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",seedsPlantable:[5,5,5,5,5,5],plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
+S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",seedsPlantable:Array.from({length:TIPS.length},()=>5),nextTip:Array.from({length:TIPS.length},()=>1),plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
 log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
 $("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
 $("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
@@ -223,6 +223,8 @@ function farmerSend(){
     console.log(`${S.fenced} not found in FARMER`);
 }
 
+
+// popup box for selecting which seed you want to receive advice about from AI/farmer/library
 function dialogueSelection(source){
     $("dialogueChoiceT").textContent=`Receive advice from the ${source}`;
     $("dialogueChoiceB").textContent=`Choose which crop you would like advice about:`
@@ -236,11 +238,14 @@ function dialogueSelection(source){
     $("askApple").onclick=()=>{sendDialogue(source,"apple")}
 }
 
+// helper function for dialogueSelection
+// sends advice to phone based on source (AI/farmer/library)
+// in case of farmer, changes S.asked to seed and sends advice on the next day through farmerSend
 function sendDialogue(source, seed){
     if (source==="assistant"){
         for(let i = 0; i < TIPS.length; i++){
             if (TIPS[i][0][0]===seed){
-                const j=Math.floor(Math.random()*(TIPS[i].length-1)+1);S.asked[i].push(j);
+                const j=nextTip[i];nextTip[i]++;if(nextTip[i]===TIPS.length){nextTip[i]=1};S.asked[i].push(j);
                 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][j][0];$("chats").prepend(d);
                 while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}
                 $("dialogueChoice").close();return;
