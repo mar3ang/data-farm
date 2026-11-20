@@ -64,7 +64,7 @@ S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"
     seedsPlantable:Array.from({length:TIPS.length},()=>5),nextTip:Array.from({length:TIPS.length},()=>1),
     farmerHeard:Array.from({length:FARMER.length},()=>0),libraryRead:Array.from({length:LIB.length},()=>0),
     plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
-log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
+log("Pick a seed, then tap a plot. Use various sources to receive guidance on how to grow each type of seed. Your goal: harvest 8 crops before the storm.");
 $("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
 $("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
 
