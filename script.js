@@ -273,7 +273,7 @@ function sendDialogue(source, seed){
     if (source==="assistant"){
         for(let i = 0; i < TIPS.length; i++){
             if (TIPS[i][0][0]===seed){
-                const j=nextTip[i];nextTip[i]++;if(nextTip[i]===TIPS.length){nextTip[i]=1};S.asked[i].push(j);
+                const j=S.nextTip[i];S.nextTip[i]++;if(S.nextTip[i]===TIPS[i].length){S.nextTip[i]=1};S.asked[i].push(j);
                 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][j][0];$("chats").prepend(d);
                 while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}
                 $("dialogueChoice").close();return;
