@@ -60,7 +60,10 @@ setInterval(tick,1000);
 // resets game to default state
 function fresh(){dayStart=Date.now();tick();
 $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ping"));
-S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",seedsPlantable:[5,5,5,5,5,5],plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
+S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",
+    seedsPlantable:Array.from({length:TIPS.length},()=>5),nextTip:Array.from({length:TIPS.length},()=>1),
+    farmerHeard:Array.from({length:FARMER.length},()=>0),libraryRead:Array.from({length:LIB.length},()=>0),
+    plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
 log("Pick a seed, then tap a plot. Your goal: harvest 8 crops before the storm.");
 $("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
 $("libText").hidden=true;$("fenceText").hidden=true;$("readLib").disabled=false;$("talkFence").disabled=false;showVisits();draw()}
@@ -216,44 +219,97 @@ function farmerSend(){
             const d=document.createElement("div");d.className="chat farmer";d.innerHTML="<b>Neighbor (farmer)</b><br>"+FARMER[i][1];$("chats").prepend(d);
             document.querySelectorAll('nav button[data-go="farm"]').forEach(b=>b.classList.add("ping"));S.fenced="";$("talkFence").disabled=false;
             $("fenceText").textContent="The farmer sent you a message. Check your phone on the farm screen.";
-            return;
+            S.farmerHeard[i]=1;return;
         }
     }
     $("fenceText").textContent=`Message failed to send. (${S.fenced} not found in FARMER)`;
     console.log(`${S.fenced} not found in FARMER`);
 }
 
+function librarySend(seedIndex){
+    S.visits--;$("libText").textContent=LIB[seedIndex][1];$("libText").hidden=false;
+    $("gardenNote").textContent="From the garden book: "+LIB[seedIndex][1];showVisits();
+    S.libraryRead[seedIndex]=1;if(S.visits<=0)$("readLib").disabled=true;return;
+}
+
+// popup box for selecting which seed you want to receive advice about from AI/farmer/library
 function dialogueSelection(source){
     $("dialogueChoiceT").textContent=`Receive advice from the ${source}`;
     $("dialogueChoiceB").textContent=`Choose which crop you would like advice about:`
+    $("dialogueAlreadySeen").textContent=""
     $("dialogueChoice").showModal()
-    $("dialogueClose").onclick=()=>{$("dialogueChoice").close()}
-    $("askCorn").onclick=()=>{sendDialogue(source,"corn")}
-    $("askPotato").onclick=()=>{sendDialogue(source,"potato")}
-    $("askWheat").onclick=()=>{sendDialogue(source,"wheat")}
-    $("askTomato").onclick=()=>{sendDialogue(source,"tomato")}
-    $("askRice").onclick=()=>{sendDialogue(source,"rice")}
-    $("askApple").onclick=()=>{sendDialogue(source,"apple")}
+    $("dialogueClose").onclick=()=>{$("dialogueChoice").close();return;}
+    $("askCorn").onclick=()=>{if(!alreadySeenDialogue(source, "corn")){sendDialogue(source,"corn")}}
+    $("askPotato").onclick=()=>{if(!alreadySeenDialogue(source, "potato")){sendDialogue(source,"potato")}}
+    $("askWheat").onclick=()=>{if(!alreadySeenDialogue(source, "wheat")){sendDialogue(source,"wheat")}}
+    $("askTomato").onclick=()=>{if(!alreadySeenDialogue(source, "tomato")){sendDialogue(source,"tomato")}}
+    $("askRice").onclick=()=>{if(!alreadySeenDialogue(source, "rice")){sendDialogue(source,"rice")}}
+    $("askApple").onclick=()=>{if(!alreadySeenDialogue(source, "apple")){sendDialogue(source,"apple")}}
 }
 
+function alreadySeenDialogue(source, seed){
+    if(source==="assistant"){
+        return false; // doesn't matter if you've seen AI dialogue already
+    }
+    else if(source==="library"){
+        for(let i = 0; i < LIB.length; i++){
+            if(LIB[i][0]===seed){if(S.libraryRead[i]){$("dialogueAlreadySeen").textContent=`You have already read about ${seed}.`;return true;} else return false;}
+            if(i===LIB.length-1){console.log(`${seed} not found in LIB`);return true;}
+        }
+    }
+    else { // source==="farmer"
+        for(let i = 0; i < FARMER.length; i++){
+            if(FARMER[i][0]===seed){if(S.farmerHeard[i]){$("dialogueAlreadySeen").textContent=`You have already heard about ${seed}.`;return true;} else return false;}
+            if(i===FARMER.length-1){console.log(`${seed} not found in FARMER`);return true;}
+        }
+    }
+}
+
+// helper function for dialogueSelection
+// sends advice to phone based on source (AI/farmer/library)
+// in case of farmer, changes S.asked to seed and sends advice on the next day through farmerSend
 function sendDialogue(source, seed){
+    $("dialogueAlreadySeen").textContent="";
     if (source==="assistant"){
         for(let i = 0; i < TIPS.length; i++){
             if (TIPS[i][0][0]===seed){
-                const j=Math.floor(Math.random()*(TIPS[i].length-1)+1);S.asked[i].push(j);
+                const j=nextTip[i];nextTip[i]++;if(nextTip[i]===TIPS.length){nextTip[i]=1};S.asked[i].push(j);
                 const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][j][0];$("chats").prepend(d);
                 while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}
                 $("dialogueChoice").close();return;
             }
         }
+        console.log(`${seed} not found in TIPS`);
     }
     else if (source==="library"){
-        for(let i = 0; i < LIB.length; i++){
-            if (LIB[i][0]===seed){
-                S.visits--;$("libText").textContent=LIB[i][1];$("libText").hidden=false;
-                $("gardenNote").textContent="From the garden book: "+LIB[i][1];showVisits();
-                if(S.visits<=0)$("readLib").disabled=true;
-                $("dialogueChoice").close();return;
+        libPassword = ""
+        characters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789" // excludes I,O,l,0
+        for(let i = 0; i < 20; i++){
+            (libPassword += characters.charAt(Math.floor(Math.random()*characters.length)));
+        }
+        $("libChallengeT").textContent=`Enter password to receive ${seed} advice`
+        $("libChallengeB").textContent=`Enter this password below: ${libPassword}`
+        $("libChallengeWrong").textContent=""
+        $("libInput").value="";
+        $("libChallenge").showModal();
+        $("libChallengeClose").onclick=()=>{$("libChallenge").close();return;}
+        
+        $("libChallengeConfirm").onclick=()=>{
+            userInput = $("libInput").value;
+            console.log(`User Input: ${userInput}`);
+            console.log(`Password:   ${libPassword}`);
+            $("libInput").value="";
+            if(userInput===libPassword){
+                for (let i = 0; i < LIB.length; i++){
+                    if(LIB[i][0]===seed){librarySend(i);$("libChallenge").close();$("dialogueChoice").close();return;}
+                    if(i===LIB.length-1){console.log(`${seed} not found in LIB`);return;}
+                }
+            }
+            else if (userInput===""){
+                $("libChallengeWrong").textContent="Please enter the password."
+            }
+            else{
+                $("libChallengeWrong").textContent="Incorrect password. Please try again."
             }
         }
     }
@@ -263,8 +319,6 @@ function sendDialogue(source, seed){
         $("fenceText").hidden=false;
         $("dialogueChoice").close();return;
     }
-    console.log(`${seed} not found in ${source==="assistant"?"TIPS":"LIB"}`); 
-    // farmer will always successfully return since it is evaluated in farmerSend() instead
 }
 
 // runs when the game is over, pulls up a popup box telling you your score
