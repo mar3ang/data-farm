@@ -357,3 +357,11 @@ li{margin:4px 0}.bad{color:#c0392b}.good{color:#2e8b3d}
 .tool[aria-pressed="true"] .seed-count {
     color: #5c4d3c; 
 }
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
