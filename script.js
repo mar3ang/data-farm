@@ -317,7 +317,8 @@ function capitalize(s){
 function pluralize(seed){
     if(seed==="corn"||seed==="wheat"||seed==="rice"){return seed}
     else if(seed==="potato"||seed==="tomato"){return seed + "es"}
-    else{return seed + "s"} // seed==="apple"
+    else if(seed==="apple"){return seed + "s"}
+    else{console.log(`${seed} not recognized by pluralize()`)}
 }
 
 // helper function for dialogueSelection
