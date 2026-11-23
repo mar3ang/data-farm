@@ -63,6 +63,7 @@ $("gardenNote").textContent=NOTE0;document.querySelectorAll("nav button").forEac
 S={day:1,score:0,asked:Array.from({length:TIPS.length},()=>[]),visits:3,fenced:"",
     seedsPlantable:Array.from({length:TIPS.length},()=>5),nextTip:Array.from({length:TIPS.length},()=>1),
     farmerHeard:Array.from({length:FARMER.length},()=>0),libraryRead:Array.from({length:LIB.length},()=>0),
+    notes:Array.from({length:TIPS.length}, () => ""),
     plots:SOILS.map(()=>Array.from({length:4},()=>({seed:null,g:0,wet:0,fert:0,dead:""})))};
 log("Pick a seed, then tap a plot. Use various sources to receive guidance on how to grow each type of seed. Your goal: harvest 8 crops before the storm.");
 $("chats").innerHTML='<div class="chat"><b>Garden Assistant</b><br>Hi! Ask me anything about your farm.</div>';
@@ -112,13 +113,9 @@ function draw(){
 function act(r,c){const p=S.plots[r][c];
 if(p.seed&&p.g>=4&&!p.dead){p.seed=null;p.g=0;S.score++;log("Harvested! Nice work.");return draw()}
 if(EMO[tool]){if(p.seed)return log("Something is already growing there.");
-for (let i = 0; i < TIPS.length; i++) {
-    if (tool === TIPS[i][0][0]) {
-        if (S.seedsPlantable[i] === 0) {return log("You have no seeds of that type left to plant.");}
-        S.seedsPlantable[i] -= 1;
-        break;
-    }
-}
+    index = findSeedIndex("assistant", tool)
+    if (S.seedsPlantable[index] === 0) {return log("You have no seeds of that type left to plant.");}
+    S.seedsPlantable[index] -= 1;
     Object.assign(p,{seed:tool,g:0,wet:0,fert:0,dead:""});log("Planted a "+tool+" in "+SOILS[r][0]+" soil.")}
 else if(!p.seed||p.dead)return log("Plant a seed first.");
 else{toolOnPlant(p,r);}
@@ -138,6 +135,34 @@ function toolOnPlant(p,r){
     $("toolConfirm").onclick=()=>{tool==="water"?p.wet=toolValue:p.fert=toolValue;
         $("toolChoice").close();tool==="water"?log("Watered."):log("Fertilized.");
         draw()}
+}
+
+// send in the name of seed and the source you want to check, return the index of the seed
+function findSeedIndex(source, seed){
+    if(source==="assistant"){
+        for (let i = 0; i < TIPS.length; i++){
+            if (seed === TIPS[i][0][0]) {
+                return i
+            }
+        }
+        console.log(`${seed} not found in TIPS`)
+    }
+    else if(source==="library"){
+        for (let i = 0; i < LIB.length; i++){
+            if (seed === LIB[i][0]) {
+                return i
+            }
+        }
+        console.log(`${seed} not found in LIB`)
+    }
+    else{ // source==="farmer"
+        for (let i = 0; i < FARMER.length; i++){
+            if (seed === FARMER[i][0]) {
+                return i
+            }
+        }
+        console.log(`${seed} not found in FARMER`)
+    }
 }
 
 // runs when clicking "Sleep until tomorrow"
@@ -211,19 +236,16 @@ $("readLib").onclick=()=>{if(S.visits<=0)return;dialogueSelection("library");}
 // cannot ask for two messages on the same day because S.fenced will return true
 $("talkFence").onclick=()=>{if(S.fenced)return;dialogueSelection("farmer");}
 
+$("notepad").onclick=()=>{dialogueSelection("notepad")}
+
 // after a day has passed, farmer will send text if S.fenced is not empty (meaning you asked for a message)
 // also reactivates fence after sending the text by setting S.fenced=""
 function farmerSend(){
-    for (let i = 0; i < FARMER.length; i++){
-        if (FARMER[i][0]===S.fenced){
-            const d=document.createElement("div");d.className="chat farmer";d.innerHTML="<b>Neighbor (farmer)</b><br>"+FARMER[i][1];$("chats").prepend(d);
-            document.querySelectorAll('nav button[data-go="farm"]').forEach(b=>b.classList.add("ping"));S.fenced="";$("talkFence").disabled=false;
-            $("fenceText").textContent="The farmer sent you a message. Check your phone on the farm screen.";
-            S.farmerHeard[i]=1;return;
-        }
-    }
-    $("fenceText").textContent=`Message failed to send. (${S.fenced} not found in FARMER)`;
-    console.log(`${S.fenced} not found in FARMER`);
+    index = findSeedIndex("farmer", S.fenced)
+    const d=document.createElement("div");d.className="chat farmer";d.innerHTML="<b>Neighbor (farmer)</b><br>"+FARMER[index][1];$("chats").prepend(d);
+    document.querySelectorAll('nav button[data-go="farm"]').forEach(b=>b.classList.add("ping"));S.fenced="";$("talkFence").disabled=false;
+    $("fenceText").textContent="The farmer sent you a message. Check your phone on the farm screen.";
+    S.farmerHeard[index]=1;return;
 }
 
 function librarySend(seedIndex){
@@ -234,8 +256,10 @@ function librarySend(seedIndex){
 
 // popup box for selecting which seed you want to receive advice about from AI/farmer/library
 function dialogueSelection(source){
-    $("dialogueChoiceT").textContent=`Receive advice from the ${source}`;
-    $("dialogueChoiceB").textContent=`Choose which crop you would like advice about:`
+    if(source==="notepad"){$("dialogueChoiceT").textContent=`Check your notes`
+        $("dialogueChoiceB").textContent=`Choose which crop to check your notes for:`}
+    else{$("dialogueChoiceT").textContent=`Receive advice from the ${source}`
+        $("dialogueChoiceB").textContent=`Choose which crop you would like advice about:`}
     $("dialogueAlreadySeen").textContent=""
     $("dialogueChoice").showModal()
     $("dialogueClose").onclick=()=>{$("dialogueChoice").close();return;}
@@ -248,21 +272,52 @@ function dialogueSelection(source){
 }
 
 function alreadySeenDialogue(source, seed){
-    if(source==="assistant"){
-        return false; // doesn't matter if you've seen AI dialogue already
+    if(source==="library"){
+        index = findSeedIndex(source,seed)
+        if(S.libraryRead[index]){$("dialogueAlreadySeen").textContent=`You have already read about ${pluralize(seed)}.`;return true;}
+        else return false;
     }
-    else if(source==="library"){
-        for(let i = 0; i < LIB.length; i++){
-            if(LIB[i][0]===seed){if(S.libraryRead[i]){$("dialogueAlreadySeen").textContent=`You have already read about ${seed}.`;return true;} else return false;}
-            if(i===LIB.length-1){console.log(`${seed} not found in LIB`);return true;}
-        }
+    else if(source==="farmer"){
+        index = findSeedIndex(source,seed)
+        if(S.farmerHeard[index]){$("dialogueAlreadySeen").textContent=`You have already heard about ${pluralize(seed)}.`;return true;} 
+        else return false;
     }
-    else { // source==="farmer"
-        for(let i = 0; i < FARMER.length; i++){
-            if(FARMER[i][0]===seed){if(S.farmerHeard[i]){$("dialogueAlreadySeen").textContent=`You have already heard about ${seed}.`;return true;} else return false;}
-            if(i===FARMER.length-1){console.log(`${seed} not found in FARMER`);return true;}
-        }
+    else{ // source==="assistant" or source==="notepad"
+        return false; // can always access notepad and it doesn't matter if you've seen AI dialogue already
     }
+}
+
+// opens the notepad for the supplied seed
+function openNotepad(seed){
+    index = findSeedIndex("assistant", seed)
+    let guidance = "<p>Tips you've received so far:<p>";
+    const uniq=Array.from({length:S.asked.length}, (v, i) => i).map(i=>new Set(S.asked[i])).map(i=>Array.from(i));
+    if(uniq[index].length){guidance+="<ul>"+uniq[index].map(j=>'<li>AI: '+TIPS[index][j][0]+"</li>").join("")+"</ul>";}
+    if(S.farmerHeard[index]){guidance+="<ul><li>Farmer: "+FARMER[index][1]+"</li></ul>"}
+    if(S.libraryRead[index]){guidance+="<ul><li>Library: "+LIB[index][1]+"</li></ul>"}
+    if(guidance==="<p>Tips you've received so far:<p>"){guidance+=`<p>You haven't received any tips about ${pluralize(seed)} yet.</p>`;}
+    $("notepadPopupT").textContent=`Notepad for ${capitalize(pluralize(seed))}`
+    $("notepadPopupB").textContent=`Take notes about ${pluralize(seed)}`
+    $("notepadInput").value=S.notes[index]?S.notes[index]:"";
+    $("notepadPopup").showModal()
+    $("notepadGuidanceReceived").innerHTML=guidance;
+    $("notepadClose").onclick=()=>{S.notes[index]=$("notepadInput").value;
+        $("notepadPopup").close();$("dialogueChoice").close();return;}
+    
+}
+
+// capitalizes the first letter of the supplied string
+function capitalize(s){
+    if(s.length > 1){return s.substring(0,1).toUpperCase() + s.substring(1)}
+    if(s.length===1){return s.toUpperCase()}
+    else{console.log("Empty string sent to capitalize()");return "";}
+}
+
+// returns the plural version of the supplied seed
+function pluralize(seed){
+    if(seed==="corn"||seed==="wheat"||seed==="rice"){return seed}
+    else if(seed==="potato"||seed==="tomato"){return seed + "es"}
+    else{return seed + "s"} // seed==="apple"
 }
 
 // helper function for dialogueSelection
@@ -270,24 +325,23 @@ function alreadySeenDialogue(source, seed){
 // in case of farmer, changes S.asked to seed and sends advice on the next day through farmerSend
 function sendDialogue(source, seed){
     $("dialogueAlreadySeen").textContent="";
-    if (source==="assistant"){
-        for(let i = 0; i < TIPS.length; i++){
-            if (TIPS[i][0][0]===seed){
-                const j=S.nextTip[i];S.nextTip[i]++;if(S.nextTip[i]===TIPS[i].length){S.nextTip[i]=1};S.asked[i].push(j);
-                const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][j][0];$("chats").prepend(d);
-                while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}
-                $("dialogueChoice").close();return;
-            }
-        }
-        console.log(`${seed} not found in TIPS`);
+    if (source==="notepad"){
+        openNotepad(seed)
+    }
+    else if (source==="assistant"){
+        i = findSeedIndex(source,seed)
+        const j=S.nextTip[i];S.nextTip[i]++;if(S.nextTip[i]===TIPS[i].length){S.nextTip[i]=1};S.asked[i].push(j);
+        const d=document.createElement("div");d.className="chat";d.innerHTML="<b>Garden Assistant</b><br>"+TIPS[i][j][0];$("chats").prepend(d);
+        while($("chats").querySelectorAll(".chat:not(.farmer)").length>3){const a=$("chats").querySelectorAll(".chat:not(.farmer)");a[a.length-1].remove()}
+        $("dialogueChoice").close();return;
     }
     else if (source==="library"){
         libPassword = ""
-        characters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789" // excludes I,O,l,0
+        characters = "ABCDEFGHJKLMNPQRTUVWXYZabcdefghijkmnopqrstuvwxyz1234689" // excludes I,O,l,0,S,5,7
         for(let i = 0; i < 20; i++){
             (libPassword += characters.charAt(Math.floor(Math.random()*characters.length)));
         }
-        $("libChallengeT").textContent=`Enter password to receive ${seed} advice`
+        $("libChallengeT").textContent=`Enter password to receive advice about ${pluralize(seed)}`
         $("libChallengeB").textContent=`Enter this password below: ${libPassword}`
         $("libChallengeWrong").textContent=""
         $("libInput").value="";
@@ -299,15 +353,14 @@ function sendDialogue(source, seed){
             console.log(`User Input: ${userInput}`);
             console.log(`Password:   ${libPassword}`);
             $("libInput").value="";
-            if(userInput===libPassword){
-                for (let i = 0; i < LIB.length; i++){
-                    if(LIB[i][0]===seed){librarySend(i);$("libChallenge").close();$("dialogueChoice").close();return;}
-                    if(i===LIB.length-1){console.log(`${seed} not found in LIB`);return;}
-                }
+            if(userInput===libPassword||userInput==="ping the pit"){
+                index = findSeedIndex("library", seed)
+                librarySend(index);$("libChallenge").close();$("dialogueChoice").close();return;
             }
             else if (userInput===""){
                 $("libChallengeWrong").textContent="Please enter the password."
             }
+            else if (userInput==="gaster".ignoreCase()){fresh();} // resets the game
             else{
                 $("libChallengeWrong").textContent="Incorrect password. Please try again."
             }
@@ -325,7 +378,7 @@ function sendDialogue(source, seed){
 // lists the tips the AI gave you, and gives you a warning that you should fact-check the AI
 function finish(){draw();const win=S.score>=GOAL;$("endT").textContent=win?"The farm survived the storm!":"The storm hit and the farm ran short.";
 const uniq=Array.from({length:S.asked.length}, (v, i) => i).map(i=>new Set(S.asked[i])).map(i=>Array.from(i));
-console.log(S.asked);console.log(uniq);
+console.log(`S.asked: ${S.asked}`);console.log(`uniq:    ${uniq}`);
 let h="<p>You harvested "+S.score+" of "+GOAL+" crops.</p>";
 for(let a = 0; a < uniq.length; a++){
     if(uniq[a].length){h+="<p>Tips the assistant gave you:</p><ul>"+uniq.map(i=>i.map(j=>'<li class="'+(TIPS[uniq.indexOf(i)][j][1]?"good":"bad")+'">'+(TIPS[uniq.indexOf(i)][j][1]?"Correct: ":"Wrong: ")+TIPS[uniq.indexOf(i)][j][0]+"</li>").join("")).join("")+"</ul>";

@@ -275,6 +275,15 @@ main{
     width:100%;
     margin-top:6px
 }
+.notepad{
+    background:var(--yellow);
+    padding:10px;
+    border-radius:4px;
+    box-shadow:2px 3px 0 rgba(0,0,0,.2);
+    transform:rotate(-1deg);
+    margin:12px 0;
+    font-size:17px
+}
 .place{
     text-align:center;
     padding:40px 20px
