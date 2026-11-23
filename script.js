@@ -353,7 +353,7 @@ function sendDialogue(source, seed){
             console.log(`User Input: ${userInput}`);
             console.log(`Password:   ${libPassword}`);
             $("libInput").value="";
-            if(userInput===libPassword||userInput==="ping the pit"){
+            if(userInput===libPassword){
                 index = findSeedIndex("library", seed)
                 librarySend(index);$("libChallenge").close();$("dialogueChoice").close();return;
             }
