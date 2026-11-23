@@ -3,6 +3,12 @@
   src: url("fonts/one-two-trees.ttf") format("truetype");
   font-display: swap;
 }
+@font-face {
+    font-family: "Wood Bonnet";
+    src: url("fonts/WoodBonnet-AntiqueNo7.ttf") format("truetype");
+    font-display: swap;
+
+}
 :root{--bg:#c2dfef;
     --paper:#fffdf5;
     --ink:#2b2118;
@@ -99,17 +105,17 @@ button:focus-visible{
 }
 main{
     padding:0 20px 24px;
-    max-width:1200px;margin:auto
+    max-width:1300px;margin:auto
 }
 .scene{display:none}
 .scene.on{display:block}
 
 .farm{
     display:grid;
-    grid-template-columns:260px 1fr 230px;
+    grid-template-columns:300px 1fr 230px;
     gap:16px;
     align-items:start}
-@media(max-width:860px){
+@media(max-width:500px){
     .farm{grid-template-columns:1fr}
     .phoneCol{order:2}
 }
@@ -147,7 +153,7 @@ main{
     background:var(--card); 
     display:flex;
     flex-direction:column;
-    height:430px
+    height:470px
 }
 .clock{
     font-family:"Gochi Hand",cursive;
