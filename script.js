@@ -124,7 +124,7 @@ draw()}
 // pulls up a popup box when using water or fertilizer on a seed
 // asks how much water/fertilizer from 0-5, using - and + buttons
 function toolOnPlant(p,r){
-    $("toolChoiceT").textContent=`${p.seed} on ${SOILS[r][0]} soil`;
+    $("toolChoiceT").textContent=`${p.seed}, age ${p.g}, on ${SOILS[r][0]} soil`;
     $("toolChoiceB").textContent=`Choose how much ${tool==="water"?"water":"fertilizer"} to give to this plant (0-5)`
     $("toolChoice").showModal()
     let toolValue = tool==="water"?p.wet:p.fert
